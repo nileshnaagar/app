@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>स्मार्ट सरिया वजन कैलकुलेटर</title>
     
     <!-- PWA Manifest Link -->
@@ -11,146 +11,556 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
+            color: #333333;
         }
+
         .calculator-card {
             background: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 28px 24px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
             width: 100%;
-            max-width: 360px;
+            max-width: 440px;
             text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
+
+        /* Top decorative line */
+        .calculator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b, #764ba2);
+        }
+
+        .header-title {
+            color: #2d3748;
+            margin-bottom: 6px;
             font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
+
+        .subtitle {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        /* Unit Switcher Tabs */
+        .unit-toggle-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .unit-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .unit-btn.active {
+            background: #ffffff;
+            color: #764ba2;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
         .input-group {
             text-align: left;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
         label {
-            font-size: 14px;
-            color: #555;
+            font-size: 13px;
+            color: #4a5568;
             font-weight: 600;
-            display: block;
-            margin-bottom: 5px;
         }
+
+        .hint {
+            font-size: 11px;
+            color: #764ba2;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Quick Preset Chips for Common Rebar Sizes */
+        .quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .chip {
+            padding: 5px 9px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chip:hover, .chip.active {
+            background: #ede9fe;
+            color: #764ba2;
+            border-color: #c4b5fd;
+        }
+
+        /* Input Controls */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
             font-size: 15px;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             outline: none;
+            background: #fafafa;
+            color: #1a202c;
+            font-weight: 500;
         }
+
         input:focus {
+            background: #ffffff;
             border-color: #764ba2;
-            box-shadow: 0 0 8px rgba(118, 75, 162, 0.3);
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.15);
         }
-        button {
+
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        /* Quantity Stepper buttons */
+        .stepper-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .stepper-btn {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .stepper-btn:hover {
+            background: #ede9fe;
+            border-color: #c4b5fd;
+            color: #764ba2;
+        }
+
+        .stepper-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Primary Calculate Button */
+        .calc-btn {
             width: 100%;
             padding: 14px;
             background: linear-gradient(45deg, #ff416c, #ff4b2b);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.35);
             transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        button:hover {
+
+        .calc-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.5);
         }
-        button:active {
+
+        .calc-btn:active {
             transform: translateY(0);
         }
+
+        /* Result Box */
         #result {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 16px;
+            border-radius: 12px;
             background: #f0fdf4;
             color: #166534;
             border: 1px solid #bbf7d0;
             display: none;
+            animation: slideDown 0.3s ease-out;
+            text-align: left;
         }
-        .footer-credit {
-            margin-top: 20px;
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-main {
+            font-size: 22px;
+            font-weight: 800;
+            color: #15803d;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .result-subgrid {
+            display: grid;
+            grid-cols: 2;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #bbf7d0;
+        }
+
+        .result-item {
+            background: #ffffff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #dcfce7;
+            text-align: center;
+        }
+
+        .result-item-label {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .result-item-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #166534;
+            margin-top: 2px;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            background: #ffffff;
+            border: 1px solid #bbf7d0;
+            color: #166534;
             font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            background: #dcfce7;
+        }
+
+        .footer-credit {
+            margin-top: 22px;
+            font-size: 13px;
             color: #888888;
-            letter-spacing: 0.5px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .nilesh-badge {
+            color: #ff416c;
+            font-weight: 700;
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 400px) {
+            .calculator-card {
+                padding: 22px 18px;
+                border-radius: 16px;
+            }
+            .header-title {
+                font-size: 20px;
+            }
+            .result-main {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="calculator-card">
-        <h2>🏗️ सरिया वजन कैलकुलेटर</h2>
+        <h2 class="header-title">🏗️ सरिया वजन कैलकुलेटर</h2>
+        <div class="subtitle">d²/162 फॉर्मूला अनुसार त्वरित व सटीक वजन</div>
+
+        <!-- Unit Switcher -->
+        <div class="unit-toggle-container">
+            <button type="button" class="unit-btn active" id="btn-metric" onclick="setUnit('metric')">मीटर (Meters)</button>
+            <button type="button" class="unit-btn" id="btn-feet" onclick="setUnit('feet')">फ़ीट (Feet)</button>
+        </div>
         
+        <!-- Diameter Input -->
         <div class="input-group">
-            <label>सरिए का व्यास (mm):</label>
-            <input type="number" id="diameter" placeholder="जैसे: 20">
+            <div class="label-row">
+                <label for="diameter">सरिए का व्यास (Diameter):</label>
+                <span class="hint">मानक साइज</span>
+            </div>
+            <!-- Quick Chips for Standard Diameters -->
+            <div class="quick-chips">
+                <span class="chip" onclick="setDia(8)">8 mm</span>
+                <span class="chip" onclick="setDia(10)">10 mm</span>
+                <span class="chip" onclick="setDia(12)">12 mm</span>
+                <span class="chip" onclick="setDia(16)">16 mm</span>
+                <span class="chip" onclick="setDia(20)">20 mm</span>
+                <span class="chip" onclick="setDia(25)">25 mm</span>
+                <span class="chip" onclick="setDia(32)">32 mm</span>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="diameter" placeholder="जैसे: 12, 16, 20" min="1" step="any" oninput="calculateWeight(true)">
+                <span class="input-suffix">mm</span>
+            </div>
         </div>
 
+        <!-- Length Input -->
         <div class="input-group">
-            <label>लंबाई (मीटर):</label>
-            <input type="number" id="length" placeholder="जैसे: 1">
+            <div class="label-row">
+                <label for="length" id="length-label">लंबाई (मीटर):</label>
+                <span class="hint" id="preset-full-bar" onclick="setStandardLength()">12m (फुल सरिया)</span>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="length" placeholder="जैसे: 12" min="0.1" step="any" oninput="calculateWeight(true)">
+                <span class="input-suffix" id="length-unit-suffix">मीटर</span>
+            </div>
         </div>
 
+        <!-- Quantity Input with Stepper -->
         <div class="input-group">
-            <label>संख्या (क्वांटिटी):</label>
-            <input type="number" id="quantity" placeholder="जैसे: 5" value="1">
+            <div class="label-row">
+                <label for="quantity">संख्या (क्वांटिटी / नग):</label>
+            </div>
+            <div class="stepper-container">
+                <button type="button" class="stepper-btn" onclick="adjustQty(-1)" title="घटाएं">-</button>
+                <input type="number" id="quantity" placeholder="जैसे: 5" value="1" min="1" step="1" oninput="calculateWeight(true)" style="text-align: center;">
+                <button type="button" class="stepper-btn" onclick="adjustQty(1)" title="बढ़ाएं">+</button>
+            </div>
         </div>
 
-        <button onclick="calculateWeight()">वजन निकालें</button>
+        <!-- Calculate Button -->
+        <button type="button" class="calc-btn" onclick="calculateWeight(false)">
+            <span>⚖️ वजन निकालें</span>
+        </button>
 
+        <!-- Result Box -->
         <div id="result"></div>
 
         <div class="footer-credit">
-            Made by Nilesh 
+            Made by <span class="nilesh-badge">Nilesh</span>
         </div>
     </div>
 
     <script>
-        function calculateWeight() {
-            let d = document.getElementById('diameter').value;
-            let l = document.getElementById('length').value;
-            let q = document.getElementById('quantity').value || 1;
-            let resultDiv = document.getElementById('result');
+        let currentUnit = 'metric'; // 'metric' or 'feet'
+
+        function setUnit(unit) {
+            currentUnit = unit;
+            const btnMetric = document.getElementById('btn-metric');
+            const btnFeet = document.getElementById('btn-feet');
+            const lengthLabel = document.getElementById('length-label');
+            const lengthSuffix = document.getElementById('length-unit-suffix');
+            const presetLink = document.getElementById('preset-full-bar');
+
+            if (unit === 'metric') {
+                btnMetric.classList.add('active');
+                btnFeet.classList.remove('active');
+                lengthLabel.innerText = "लंबाई (मीटर):";
+                lengthSuffix.innerText = "मीटर";
+                presetLink.innerText = "12m (फुल सरिया)";
+            } else {
+                btnFeet.classList.add('active');
+                btnMetric.classList.remove('active');
+                lengthLabel.innerText = "लंबाई (फ़ीट):";
+                lengthSuffix.innerText = "फ़ीट";
+                presetLink.innerText = "40ft (फुल सरिया)";
+            }
+            calculateWeight(true);
+        }
+
+        function setDia(val) {
+            document.getElementById('diameter').value = val;
+            // update chips visual active state
+            document.querySelectorAll('.chip').forEach(el => {
+                if (el.innerText.trim() === val + ' mm') {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            calculateWeight(true);
+        }
+
+        function setStandardLength() {
+            if (currentUnit === 'metric') {
+                document.getElementById('length').value = 12;
+            } else {
+                document.getElementById('length').value = 40;
+            }
+            calculateWeight(true);
+        }
+
+        function adjustQty(change) {
+            const qtyInput = document.getElementById('quantity');
+            let current = parseInt(qtyInput.value) || 1;
+            let nextVal = Math.max(1, current + change);
+            qtyInput.value = nextVal;
+            calculateWeight(true);
+        }
+
+        function calculateWeight(isLive = false) {
+            const d = parseFloat(document.getElementById('diameter').value);
+            const l = parseFloat(document.getElementById('length').value);
+            const q = parseFloat(document.getElementById('quantity').value) || 1;
+            const resultDiv = document.getElementById('result');
 
             if (d > 0 && l > 0 && q > 0) {
-                let weight = ((d * d) / 162) * l * q;
+                let weightKg = 0;
+                let unitWeight = 0;
+
+                if (currentUnit === 'metric') {
+                    // Formula in meters: (d * d / 162.2) * l * q
+                    unitWeight = (d * d) / 162.2;
+                    weightKg = unitWeight * l * q;
+                } else {
+                    // Formula in feet: (d * d / 533) * l * q
+                    unitWeight = (d * d) / 533;
+                    weightKg = unitWeight * l * q;
+                }
+
+                const weightQuintal = (weightKg / 100).toFixed(2);
+                const weightTon = (weightKg / 1000).toFixed(3);
+                const weightPerBar = (weightKg / q).toFixed(2);
+
                 resultDiv.style.display = "block";
                 resultDiv.style.background = "#f0fdf4";
                 resultDiv.style.color = "#166534";
                 resultDiv.style.borderColor = "#bbf7d0";
-                resultDiv.innerText = "कुल वजन: " + weight.toFixed(2) + " kg";
+
+                resultDiv.innerHTML = `
+                    <div class="result-main">कुल वजन: ${weightKg.toFixed(2)} kg</div>
+                    <div class="result-subgrid">
+                        <div class="result-item">
+                            <div class="result-item-label">क्विंटल (100 kg)</div>
+                            <div class="result-item-val">${weightQuintal} Qtl</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-item-label">टन (1000 kg)</div>
+                            <div class="result-item-val">${weightTon} Ton</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-item-label">1 सरिए का वजन</div>
+                            <div class="result-item-val">${weightPerBar} kg</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-item-label">प्रति ${currentUnit === 'metric' ? 'मीटर' : 'फ़ीट'} वजन</div>
+                            <div class="result-item-val">${unitWeight.toFixed(3)} kg</div>
+                        </div>
+                    </div>
+                    <button type="button" class="copy-btn" onclick="copyResult(${weightKg.toFixed(2)}, ${d}, ${l}, ${q})">
+                        📋 परिणाम कॉपी करें
+                    </button>
+                `;
             } else {
-                resultDiv.style.display = "block";
-                resultDiv.style.background = "#fef2f2";
-                resultDiv.style.color = "#991b1b";
-                resultDiv.style.borderColor = "#fecaca";
-                resultDiv.innerText = "कृपया सही जानकारी भरें!";
+                if (!isLive) {
+                    resultDiv.style.display = "block";
+                    resultDiv.style.background = "#fef2f2";
+                    resultDiv.style.color = "#991b1b";
+                    resultDiv.style.borderColor = "#fecaca";
+                    resultDiv.innerHTML = "<div style='text-align:center; font-weight:600;'>कृपया सही व्यास, लंबाई और संख्या दर्ज करें!</div>";
+                }
             }
+        }
+
+        function copyResult(weight, dia, len, qty) {
+            const unitTxt = currentUnit === 'metric' ? 'मीटर' : 'फ़ीट';
+            const text = `🏗️ सरिया वजन: Ø${dia}mm × ${len}${unitTxt} (${qty} नग) = ${weight} kg (Made by Nilesh)`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("परिणाम कॉपी हो गया!");
+            });
         }
 
         // PWA Service Worker Registration
