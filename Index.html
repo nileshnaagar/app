@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>स्मार्ट सरिया वजन कैलकुलेटर</title>
+    
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .calculator-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 8px rgba(118, 75, 162, 0.3);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            display: none;
+        }
+        .footer-credit {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888888;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-card">
+        <h2>🏗️ सरिया वजन कैलकुलेटर</h2>
+        
+        <div class="input-group">
+            <label>सरिए का व्यास (mm):</label>
+            <input type="number" id="diameter" placeholder="जैसे: 20">
+        </div>
+
+        <div class="input-group">
+            <label>लंबाई (मीटर):</label>
+            <input type="number" id="length" placeholder="जैसे: 1">
+        </div>
+
+        <div class="input-group">
+            <label>संख्या (क्वांटिटी):</label>
+            <input type="number" id="quantity" placeholder="जैसे: 5" value="1">
+        </div>
+
+        <button onclick="calculateWeight()">वजन निकालें</button>
+
+        <div id="result"></div>
+
+        <div class="footer-credit">
+            Made by Nilesh 
+        </div>
+    </div>
+
+    <script>
+        function calculateWeight() {
+            let d = document.getElementById('diameter').value;
+            let l = document.getElementById('length').value;
+            let q = document.getElementById('quantity').value || 1;
+            let resultDiv = document.getElementById('result');
+
+            if (d > 0 && l > 0 && q > 0) {
+                let weight = ((d * d) / 162) * l * q;
+                resultDiv.style.display = "block";
+                resultDiv.style.background = "#f0fdf4";
+                resultDiv.style.color = "#166534";
+                resultDiv.style.borderColor = "#bbf7d0";
+                resultDiv.innerText = "कुल वजन: " + weight.toFixed(2) + " kg";
+            } else {
+                resultDiv.style.display = "block";
+                resultDiv.style.background = "#fef2f2";
+                resultDiv.style.color = "#991b1b";
+                resultDiv.style.borderColor = "#fecaca";
+                resultDiv.innerText = "कृपया सही जानकारी भरें!";
+            }
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((reg) => console.log('Service Worker Registered!', reg))
+                    .catch((err) => console.log('Service Worker Registration Failed!', err));
+            });
+        }
+    </script>
+
+</body>
+</html>
